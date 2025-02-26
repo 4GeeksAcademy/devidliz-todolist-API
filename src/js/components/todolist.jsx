@@ -1,78 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function Tareas() {
+    const [tareas, setTareas] = useState([]);
+    const [nuevaTarea, setNuevaTarea] = useState('');
 
-  const [tareas, setTareas] = useState([]);
+    const API_URL = 'https://playground.4geeks.com/todo/users/deividliz'; // URL de la API
+    const userName = 'deividliz'
 
-  // Estado para almacenar el texto de la nueva tarea que el usuario está escribiendo
-  const [nuevaTarea, setNuevaTarea] = useState('');
+    useEffect(() => {
+        // Carga inicial de tareas desde la API
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(data => setTareas(data.todos || [])); // En el caso de que no haya tareas (data.todos sea null o undefined)
+    }, []);
 
+    const inputChange = (event) => {
+        setNuevaTarea(event.target.value);
+    };
 
-  // Función para el cambio en el input de la nueva tarea
-  const inputChange = (event) => {
+    const KeyDown = async (event) => {
+        if (event.key === 'Enter' && nuevaTarea.trim() !== '') {
+            const nuevaTareaObj = {
+                label: nuevaTarea.trim(),
+                is_done: false 
+            };
 
-    // Actualizamos el estado 'nuevaTarea' con el valor actual del input
-    setNuevaTarea(event.target.value);
-  };
+            fetch(`https://playground.4geeks.com/todo/todos/${userName}`, { // URL para añadir tareas
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevaTareaObj)
+            })
+                .then(response => response.json())
+                .then(tareaGuardada => {
+                    setTareas([...tareas, tareaGuardada]);
+                    setNuevaTarea('');
+                });
+        }
+    };
 
-  // Función para la tecla Enter
-  const KeyDown = (event) => {
+    const deleteTarea = async (id) => {
+        fetch(`https://playground.4geeks.com/todo/todos/${id}`, { method: 'DELETE' }) // URL correcta para eliminar tareas una a una
+            .then(() => {
+                const nuevasTareas = tareas.filter(tarea => tarea.id !== id);
+                setTareas(nuevasTareas);
+            });
+    };
 
-    // Si se presiona Enter y el campo de entrada no está vacío
-    if (event.key === 'Enter' && nuevaTarea.trim !== '') {
-      
-      // Creamos una nueva lista de tareas a partir de la lista actual
-      const nuevasTareas = [...tareas, nuevaTarea];
-
-      // Actualizamos el estado 'tareas' con la nueva lista que incluye la nueva tarea
-      setTareas(nuevasTareas);
-
-      // Limpiamos el campo de entrada 
-      setNuevaTarea('');
-    }
-  };
-
-  // Función para eliminar una tarea
-  const deleteTarea = (index) => {
-    // Creamos una copia de la lista de tareas para evitar modificar el estado directamente
-    const nuevasTareas = [...tareas];
-    // Eliminamos la tarea en la posición indicada utilizando splice
-    nuevasTareas.splice(index, 1);
-    // Actualizamos el estado con la lista modificada
-    setTareas(nuevasTareas);
-  };
-
-  // Renderizamos 
-  return (
-    <div className='titulo'><h1>Esta es tu todolist</h1>
-    <div className="tareas-container">
-
-      {/* Input para agregar nuevas tareas */}
-      <input
-        type="text"
-        value={nuevaTarea}
-        onChange={inputChange}
-        onKeyDown={KeyDown}
-        placeholder="Agrega una tarea"
-      />
-      {/* Lista de tareas */}
-      <ul>
-        {/* Si no hay tareas, mostramos un mensaje */}
-        {tareas.length === 0 ? (
-          <li>No hay tareas, añade tareas</li>) : (
-
-          // Si hay tareas las mapeamos y renderizamos cada una
-
-          tareas.map((tarea, index) => (
-            <li key={index}> {tarea}
-            <button onClick={() => deleteTarea(index)}>X</button>
-            </li>
-          ))
-        )}
-      </ul>
-    </div>
-    </div>
-  );
+    const deleteAllTareas = async () => {
+        
+            // 1. Pedirle a la API la lista de todas las tareas del usuario
+            const todasTareas = await fetch(`https://playground.4geeks.com/todo/users/${userName}`); // Eliminar tareas todas a la vez
+            const datos = await todasTareas.json();
+            const listaDeTareas = datos.todos || []; // Si no hay tareas, usamos una lista vacía
+    
+            // 2. Para cada tarea en la lista, pedirle a la API que la borre
+            for (let i = 0; i < listaDeTareas.length; i++) {
+                let tarea = listaDeTareas[i];
+                await fetch(`https://playground.4geeks.com/todo/todos/${tarea.id}`, {
+                    method: 'DELETE' 
+                });
+            }
+    
+            // 3. Cuando terminamos actualizamos la lista
+            setTareas([]);
+    
+         throw (error) => {
+            // Si algo sale mal, mostramos un mensaje de error
+            console.error('No se pudieron borrar las tareas:', error);
+        }
+    };
+    return (
+        <div className='titulo'>
+            <h1>Mi lista de tareas</h1>
+            <div className="tareas-container">
+                <input
+                    type="text"
+                    value={nuevaTarea}
+                    onChange={inputChange}
+                    onKeyDown={KeyDown}
+                    placeholder="Agrega una tarea"
+                />
+                <button  onClick={deleteAllTareas}>Limpiar todas las tareas</button>
+                <ul>
+                    {tareas.length === 0 ? (<li>No hay tareas, añade tareas</li>) : (
+                        tareas.map((tarea) => (
+                            <li key={tarea.id}>
+                                <strong>{tarea.label}</strong> {/* Muestra el texto de la tarea */}
+                                <button className='btn' onClick={() => deleteTarea(tarea.id)}>X</button>
+                            </li>
+                        ))
+                    )}
+                </ul>
+            </div>
+        </div>
+    );
 }
 
 export default Tareas;

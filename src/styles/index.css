@@ -15,13 +15,13 @@ body {
   align-items: flex-start; 
   min-height: 100vh; 
   margin: 0; 
-  background: url('https://imgs.search.brave.com/Pz8YSF0g20xRRXqjI3Tx6W5cTVsadlcZ2m18E64uA6E/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTg0/Mzk4MjA5L2VzL2Zv/dG8vcCVDMyVBMWdp/bmEtZGUtYmxvYy1k/ZS1ub3Rhcy5qcGc_/cz02MTJ4NjEyJnc9/MCZrPTIwJmM9MVkt/VHhPNWVTTFVDaS1J/QzhWRWpyTzNjRkpj/dTRpYlRmdzZHbnpl/NkxSMD0') center/cover no-repeat;
+  background: url('https://imgs.search.brave.com/vhwoxHER6q1BOqLRjrD2xrBnq8DoiQW3_ClMYm0SmoU/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/Zm90by1ncmF0aXMv/Y29uY2VwdG8tb3Jn/YW5pemFjaW9uLXRp/ZW1wby1wbGFuaWZp/Y2Fkb3ItY2VyY2Ff/MjMtMjE0OTA0Njc0/NS5qcGc_c2VtdD1h/aXNfaHlicmlk') center/cover no-repeat;
  
 }
 
 .tareas-container {
   padding: 30px;
- color: blue;
+ color: black;
   width: 100%; 
   max-width: 600px; 
   box-sizing: border-box; }
@@ -42,7 +42,7 @@ body {
     margin-top: 10px;
   }
   
-  button {
+  button.btn {
     margin-left: 50px;
     
     border: none;
@@ -50,9 +50,12 @@ body {
     visibility: hidden;
   }
   
-  li:hover button {
+  li:hover button.btn {
     color: red;
     visibility: visible;
+  }
+  button{
+    margin-left: 1rem;
   }
 
   h1 {
